@@ -35,7 +35,7 @@ TAGS:: CONTENTS
 	etags `cat $<`
 
 rpm: dist
-	rpm -ta $(PACKAGE)-$(VERSION).tar.gz
+	rpmbuild -ta $(PACKAGE)-$(VERSION).tar.gz
 	mv -f /usr/src/redhat/SRPMS/$(PACKAGE)-$(VERSION)-*.rpm $(top_srcdir)
 	mv -f /usr/src/redhat/RPMS/*/$(PACKAGE)-$(VERSION)-*.rpm $(top_srcdir)
 	mv -f /usr/src/redhat/RPMS/*/$(PACKAGE)-devel-$(VERSION)-*.rpm \

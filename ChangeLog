@@ -1,5 +1,17 @@
 This file describes the changes to the Log for C++ library. See the CVS repository for more detailed descriptions.
 
+2002-05-09 Bastiaan Bakker <bastiaan.bakker@lifeline.nl>
+	* Release as 0.2.8
+	
+	* configure.in: upped version to 0.2.8.
+	
+	* tests/testbench.cpp, tests/testPriority.cpp, tests/testFilter.cpp:
+	added missing 'std::' specifiers. (bug #530332)
+
+	* tests/Clock.cpp, log4cpp.spec.in: updated from -devel branch.
+	
+	* src/SyslogAppender.cpp: fix format string bug. (bug #527475)
+
 2002-02-05 Bastiaan Bakker <bastiaan.bakker@lifeline.nl>
 	* src/AppenderSkeleton.cpp: doAppend(): correct comparison of 
 	_threshold against event priority (bug #513481).

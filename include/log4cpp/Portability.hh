@@ -21,7 +21,8 @@
 #endif
 
 #if defined(_MSC_VER)
-#    pragma warning( disable : 4786 )
+#    pragma warning( disable : 4786 ) // 255 char debug symbol limit
+#    pragma warning( disable : 4290 ) // throw specifier not implemented
 #endif
 
 #ifndef LOG4CPP_HAVE_STRCASECMP
