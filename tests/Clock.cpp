@@ -4,12 +4,13 @@ static const char rcsid[] = "$Id$";
  * See the COPYING file for the terms of usage and distribution.
  */
 
-#include <stdlib.h>
+#include <cstdlib>
 #include <sys/time.h>			// for struct timeval
 #ifdef __osf__
 #    include <machine/builtins.h>       // for __RPCC()
-#elif __linux__
-#    include <asm/msr.h>		// for rdtscl()
+#elif __linux__ && __i386__
+#    define rdtscl(low) \
+     __asm__ __volatile__("rdtsc" : "=a" (low) : : "edx")
 #endif
 #include <iostream>
 
@@ -20,7 +21,7 @@ namespace
     const usec_t UsecPerSec = INT64_CONSTANT(1000000);
 }
 
-bool Clock::UsingCPU  = ::getenv("CLOCK_USE_CPU") ? true : false;
+bool Clock::UsingCPU  = std::getenv("CLOCK_USE_CPU") ? true : false;
 
 // -----------------------------------------------------------------------------
 usec_t Clock::time(void)
@@ -35,7 +36,7 @@ usec_t Clock::time(void)
 
 #ifdef __osf__
 	return (usec_t) __RPCC();
-#elif __linux__
+#elif __linux__ && __i386__
 	{
 	    unsigned long tsc;
 			
