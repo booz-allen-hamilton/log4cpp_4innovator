@@ -41,6 +41,7 @@ namespace log4cpp {
         virtual void shutdown();
         void register_shutdown_handler(shutdown_fun_ptr handler);
         virtual void deleteAllCategories();
+        virtual void clearCategoriesMap();
 
         protected:
         virtual Category* _getExistingInstance(const std::string& name);

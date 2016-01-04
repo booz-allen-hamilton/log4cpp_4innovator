@@ -127,4 +127,10 @@ namespace log4cpp {
         }
     }
 
+    void HierarchyMaintainer::clearCategoriesMap() {
+		deleteAllCategories();
+        threading::ScopedLock lock(_categoryMutex);
+		_categoryMap.clear();
+	}
+
 }

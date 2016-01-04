@@ -9,21 +9,51 @@
 
 #include "PortabilityImpl.hh"
 #include <log4cpp/Appender.hh>
+#include <iostream>
 
 namespace log4cpp {
-    Appender::AppenderMap* Appender::_allAppenders = 0;
-    threading::Mutex Appender::_appenderMapMutex;
+	static int nifty_counter; // zero initialized at load time
+	static char appenderMapStorage_buf[sizeof(Appender::AppenderMapStorage)]; // memory for the nifty-counter singleton object
+	Appender::AppenderMapStorage &Appender::_appenderMapStorageInstance = reinterpret_cast<Appender::AppenderMapStorage&> (appenderMapStorage_buf);
+
+	Appender::AppenderMapStorage *tmp_appenderMapStorageInstance;
+
+    //threading::Mutex Appender::AppenderMapStorage::_appenderMapMutex;
+
+	Appender::AppenderMapStorage::AppenderMapStorage()  { 
+		_allAppenders = new AppenderMap(); 
+		std::cout << "Allocated appenders!" << std::endl;
+	};
+	Appender::AppenderMapStorage::~AppenderMapStorage() { 
+		std::cout << "DeAllocated appenders!" << std::endl;
+		_deleteAllAppendersWOLock(); 
+		delete _allAppenders; 
+	};
+	
+	Appender::AppenderMapStorageInitializer::AppenderMapStorageInitializer() {
+		 if (nifty_counter++ == 0) {
+//			 tmp_appenderMapStorageInstance = new AppenderMapStorage();
+		#define prev_new new
+		#define new new
+			 new (&_appenderMapStorageInstance) AppenderMapStorage(); // placement new
+		#define new prev_new 
+		 }
+ 	}
+	Appender::AppenderMapStorageInitializer::~AppenderMapStorageInitializer() {
+		if (--nifty_counter == 0) {
+			(&_appenderMapStorageInstance)->~AppenderMapStorage ();
+			//tmp_appenderMapStorageInstance->~AppenderMapStorage ();
+		}
+	}
 
     /* assume _appenderMapMutex locked */
     Appender::AppenderMap& Appender::_getAllAppenders() {
-        if (!_allAppenders) 
-            _allAppenders = new Appender::AppenderMap();
-
-        return *_allAppenders;
+		return *_appenderMapStorageInstance._allAppenders;
+//		return *tmp_appenderMapStorageInstance->_allAppenders;
     }
 
     Appender* Appender::getAppender(const std::string& name) {
-        threading::ScopedLock lock(_appenderMapMutex);
+        threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
         AppenderMap& allAppenders = Appender::_getAllAppenders();
         AppenderMap::iterator i = allAppenders.find(name);
         return (allAppenders.end() == i) ? NULL : ((*i).second);
@@ -31,20 +61,18 @@ namespace log4cpp {
     
     void Appender::_addAppender(Appender* appender) {
         //REQUIRE(_allAppenders.find(appender->getName()) == _getAllAppenders().end())
-        threading::ScopedLock lock(_appenderMapMutex);
+        threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
         _getAllAppenders()[appender->getName()] = appender;
     }
 
     void Appender::_removeAppender(Appender* appender) {
-        threading::ScopedLock lock(_appenderMapMutex);
+        threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
+		//private called from destructor only, but may be triggered by client code in several treads
         _getAllAppenders().erase(appender->getName());
-        if(_getAllAppenders().size() == 0) {
-	    delete _allAppenders; _allAppenders = 0;	// fix for #2940452 
-        }
     }
     
     bool Appender::reopenAll() {
-        threading::ScopedLock lock(_appenderMapMutex);
+        threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
         bool result = true;
         AppenderMap& allAppenders = _getAllAppenders();
         for(AppenderMap::iterator i = allAppenders.begin(); i != allAppenders.end(); i++) {
@@ -55,7 +83,7 @@ namespace log4cpp {
     }
     
     void Appender::closeAll() {
-        threading::ScopedLock lock(_appenderMapMutex);
+        threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
         AppenderMap& allAppenders = _getAllAppenders();
         for(AppenderMap::iterator i = allAppenders.begin(); i != allAppenders.end(); i++) {
             ((*i).second)->close();
@@ -63,7 +91,12 @@ namespace log4cpp {
     }
     
     void Appender::_deleteAllAppenders() {
-        threading::ScopedLock lock(_appenderMapMutex);
+        threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
+		_deleteAllAppendersWOLock();
+	}    
+
+    void Appender::_deleteAllAppendersWOLock() {
+    /* assume _appenderMapMutex locked */
         AppenderMap& allAppenders = _getAllAppenders();
         for(AppenderMap::iterator i = allAppenders.begin(); i != allAppenders.end(); ) {
             Appender *app = (*i).second;

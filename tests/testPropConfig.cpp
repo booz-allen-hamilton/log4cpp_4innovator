@@ -14,9 +14,19 @@
 
 #include <log4cpp/Category.hh>
 #include <log4cpp/PropertyConfigurator.hh>
+#include <log4cpp/HierarchyMaintainer.hh>
+
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
+
+
+
 
 int main(int argc, char* argv[])
 {
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+
     try {
         std::string initFileName;
 #if defined(WIN32)
@@ -63,8 +73,13 @@ int main(int argc, char* argv[])
     nt.debug("subNT debug");
 #endif
 
-    log4cpp::Category::shutdown();
+	//log4cpp::Category::shutdown();
+//    log4cpp::Category::shutdownForced();
 
-    return 0;
+//report memory leaks
+//_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
+//_CrtDumpMemoryLeaks();
+
+	return 0;
 }
 

@@ -49,6 +49,13 @@ namespace log4cpp {
         HierarchyMaintainer::getDefaultMaintainer().shutdown();
     }
 
+    void Category::shutdownForced() {
+        HierarchyMaintainer::getDefaultMaintainer().shutdown();
+		HierarchyMaintainer::getDefaultMaintainer().clearCategoriesMap();
+		Appender::_deleteAllAppenders();
+    }
+
+
     Category::Category(const std::string& name, Category* parent, Priority::Value priority) : 
         _name(name),
         _parent(parent),
