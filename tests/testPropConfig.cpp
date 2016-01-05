@@ -20,25 +20,14 @@
 #include <stdlib.h>
 #include <crtdbg.h>
 
-
-
-
-int main(int argc, char* argv[])
-{
-	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
-
-    try {
-        std::string initFileName;
+void testPropConfigRead() {
+    std::string initFileName;
 #if defined(WIN32)
         initFileName = "./log4cpp.nt.property";
 #else
         initFileName = "./log4cpp.property";
 #endif
-        log4cpp::PropertyConfigurator::configure(initFileName);
-    } catch(log4cpp::ConfigureFailure& f) {
-        std::cout << "Configure Problem " << f.what() << std::endl;
-        return -1;
-    }
+    log4cpp::PropertyConfigurator::configure(initFileName);
 
     log4cpp::Category& root = log4cpp::Category::getRoot();
 
@@ -73,12 +62,25 @@ int main(int argc, char* argv[])
     nt.debug("subNT debug");
 #endif
 
-	//log4cpp::Category::shutdown();
-//    log4cpp::Category::shutdownForced();
+    log4cpp::Category::shutdownForced(); 
+}
 
-//report memory leaks
-//_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_DEBUG);
-//_CrtDumpMemoryLeaks();
+int main(int argc, char* argv[])
+{
+	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+
+    try {
+		// test single properties read
+		testPropConfigRead();
+
+		// test few more instantiations and shutdowns by shutdownForced()
+		for (int i=0; i < 2; ++i) {
+			testPropConfigRead();
+		}
+    } catch(log4cpp::ConfigureFailure& f) {
+        std::cout << "Configure Problem " << f.what() << std::endl;
+        return -1; 
+    }
 
 	return 0;
 }

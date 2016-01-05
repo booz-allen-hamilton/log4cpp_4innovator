@@ -51,7 +51,6 @@ namespace log4cpp {
 
     void Category::shutdownForced() {
         HierarchyMaintainer::getDefaultMaintainer().shutdown();
-		HierarchyMaintainer::getDefaultMaintainer().clearCategoriesMap();
 		Appender::_deleteAllAppenders();
     }
 

@@ -12,44 +12,34 @@
 #include <iostream>
 
 namespace log4cpp {
-	static int nifty_counter; // zero initialized at load time
+	static int appenders_nifty_counter; // zero initialized at load time
 	static char appenderMapStorage_buf[sizeof(Appender::AppenderMapStorage)]; // memory for the nifty-counter singleton object
 	Appender::AppenderMapStorage &Appender::_appenderMapStorageInstance = reinterpret_cast<Appender::AppenderMapStorage&> (appenderMapStorage_buf);
 
-	Appender::AppenderMapStorage *tmp_appenderMapStorageInstance;
-
-    //threading::Mutex Appender::AppenderMapStorage::_appenderMapMutex;
-
 	Appender::AppenderMapStorage::AppenderMapStorage()  { 
 		_allAppenders = new AppenderMap(); 
-		std::cout << "Allocated appenders!" << std::endl;
+		//std::cout << "Allocated appenders!" << std::endl;
 	};
 	Appender::AppenderMapStorage::~AppenderMapStorage() { 
-		std::cout << "DeAllocated appenders!" << std::endl;
+		//std::cout << "DeAllocating appenders!" << std::endl;
 		_deleteAllAppendersWOLock(); 
 		delete _allAppenders; 
 	};
 	
 	Appender::AppenderMapStorageInitializer::AppenderMapStorageInitializer() {
-		 if (nifty_counter++ == 0) {
-//			 tmp_appenderMapStorageInstance = new AppenderMapStorage();
-		#define prev_new new
-		#define new new
+		 if (appenders_nifty_counter++ == 0) {
 			 new (&_appenderMapStorageInstance) AppenderMapStorage(); // placement new
-		#define new prev_new 
 		 }
  	}
 	Appender::AppenderMapStorageInitializer::~AppenderMapStorageInitializer() {
-		if (--nifty_counter == 0) {
+		if (--appenders_nifty_counter == 0) {
 			(&_appenderMapStorageInstance)->~AppenderMapStorage ();
-			//tmp_appenderMapStorageInstance->~AppenderMapStorage ();
 		}
 	}
 
     /* assume _appenderMapMutex locked */
     Appender::AppenderMap& Appender::_getAllAppenders() {
 		return *_appenderMapStorageInstance._allAppenders;
-//		return *tmp_appenderMapStorageInstance->_allAppenders;
     }
 
     Appender* Appender::getAppender(const std::string& name) {
