@@ -14,21 +14,27 @@
 namespace log4cpp {
 	static int appenders_nifty_counter; // zero initialized at load time
 	static char appenderMapStorage_buf[sizeof(Appender::AppenderMapStorage)]; // memory for the nifty-counter singleton object
-	Appender::AppenderMapStorage &Appender::_appenderMapStorageInstance = reinterpret_cast<Appender::AppenderMapStorage&> (appenderMapStorage_buf);
+	Appender::AppenderMapStorage &Appender::_appenderMapStorageInstance = reinterpret_cast<Appender::AppenderMapStorage&> (appenderMapStorage_buf); // memory for placement new
 
 	Appender::AppenderMapStorage::AppenderMapStorage()  { 
 		_allAppenders = new AppenderMap(); 
-		//std::cout << "Allocated appenders!" << std::endl;
 	};
 	Appender::AppenderMapStorage::~AppenderMapStorage() { 
-		//std::cout << "DeAllocating appenders!" << std::endl;
-		_deleteAllAppendersWOLock(); 
+		_deleteAllAppenders(); 
 		delete _allAppenders; 
 	};
 	
 	Appender::AppenderMapStorageInitializer::AppenderMapStorageInitializer() {
 		 if (appenders_nifty_counter++ == 0) {
+// MSVC's <crtdbg.h> requires redefinition of the new operator, but could not deal with placement new form of it
+#ifdef MSVC_MEMORY_LEAK_CHECK
+#pragma push_macro("new")
+#define new new
+#endif // MSVC_MEMORY_LEAK_CHECK
 			 new (&_appenderMapStorageInstance) AppenderMapStorage(); // placement new
+#ifdef MSVC_MEMORY_LEAK_CHECK
+#pragma pop_macro("new")
+#endif // MSVC_MEMORY_LEAK_CHECK
 		 }
  	}
 	Appender::AppenderMapStorageInitializer::~AppenderMapStorageInitializer() {
@@ -81,16 +87,27 @@ namespace log4cpp {
     }
     
     void Appender::_deleteAllAppenders() {
-        threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
-		_deleteAllAppendersWOLock();
+		// deleting each appenders will cause a lock on Appender::_appenderMapMutex to be obtained again within destructor. to avoid nested locks:
+		std::vector<Appender*> appenders;
+		{
+			threading::ScopedLock lock(_appenderMapStorageInstance._appenderMapMutex);
+			AppenderMap& allAppenders = _getAllAppenders();
+			appenders.reserve(allAppenders.size());
+			for(AppenderMap::iterator i = allAppenders.begin(); i != allAppenders.end(); ) {
+				Appender* app = (*i).second;
+				++i;
+				appenders.push_back(app);
+			}
+		    allAppenders.clear();
+		}
+		_deleteAllAppendersWOLock(appenders);
 	}    
 
-    void Appender::_deleteAllAppendersWOLock() {
-    /* assume _appenderMapMutex locked */
+    void Appender::_deleteAllAppendersWOLock(std::vector<Appender*> &appenders) {
+    /* assume Appender::_appenderMapMutex not locked */
         AppenderMap& allAppenders = _getAllAppenders();
-        for(AppenderMap::iterator i = allAppenders.begin(); i != allAppenders.end(); ) {
-            Appender *app = (*i).second;
-            i++; // increment iterator before delete or iterator will be invalid.
+        for(std::vector<Appender*>::iterator i = appenders.begin(); i != appenders.end(); ++i) {
+            Appender *app = (*i);
             delete (app);
         }
     }    

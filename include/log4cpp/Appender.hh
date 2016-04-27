@@ -14,6 +14,7 @@
 #include <string>
 #include <map>
 #include <set>
+#include <vector>
 #include <stdarg.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -136,7 +137,7 @@ namespace log4cpp {
 
         static AppenderMap& _getAllAppenders();
         static void _deleteAllAppenders();
-		static void _deleteAllAppendersWOLock();
+		static void _deleteAllAppendersWOLock(std::vector<Appender*> &appenders);
         static void _addAppender(Appender* appender);
         static void _removeAppender(Appender* appender);
 

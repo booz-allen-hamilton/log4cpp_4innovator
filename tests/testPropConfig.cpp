@@ -16,7 +16,6 @@
 #include <log4cpp/PropertyConfigurator.hh>
 #include <log4cpp/HierarchyMaintainer.hh>
 
-#define _CRTDBG_MAP_ALLOC
 #include <stdlib.h>
 #include <crtdbg.h>
 
@@ -63,11 +62,15 @@ void testPropConfigRead() {
 #endif
 
     log4cpp::Category::shutdownForced(); 
+//    log4cpp::Category::shutdown(); 
 }
 
 int main(int argc, char* argv[])
 {
+// _CRTDBG_MAP_ALLOC is for detecting memory leaks on Windows
+#ifdef _CRTDBG_MAP_ALLOC
 	_CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
+#endif
 
     try {
 		// test single properties read
@@ -82,6 +85,8 @@ int main(int argc, char* argv[])
         return -1; 
     }
 
+#ifdef _CRTDBG_MAP_ALLOC
+	//_CrtDumpMemoryLeaks(); // would give detected leaks, since statically allocated objects were not freed yet
+#endif
 	return 0;
 }
-

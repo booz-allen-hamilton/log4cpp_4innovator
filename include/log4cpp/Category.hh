@@ -96,7 +96,7 @@ namespace log4cpp {
 
         /**
          * This method will remove all Appenders from Categories.XXX and delete all appenders.
-		 * Releases more than shutdown() by deleting appenders.
+		 * Releases more memory than shutdown() by deleting appenders.
          **/
         static void shutdownForced();
 
