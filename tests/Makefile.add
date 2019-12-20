@@ -1,7 +1,7 @@
 
 # Common
 # Use CMock to generate mock code
-export CMOCK_DIR ?= ~/cmock
+export CMOCK_DIR ?= ../cmock
 mocks:
 	ruby ../cmock/scripts/create_mock.rb ../include/log4cpp/HierarchyMaintainer.hh
 	ruby ../cmock/scripts/create_mock.rb ../include/log4cpp/LayoutsFactory.hh
