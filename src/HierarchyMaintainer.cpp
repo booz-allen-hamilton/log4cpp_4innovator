@@ -21,7 +21,10 @@
 #include <log4cpp/FileAppender.hh>
 
 namespace log4cpp {
-
+// TODO: Works for unity test framework, but not googletest
+//#if defined(TEST) || defined(UNIT_TEST)
+    __attribute__((weak))
+//#endif
     HierarchyMaintainer& HierarchyMaintainer::getDefaultMaintainer() {
         static HierarchyMaintainer defaultMaintainer;
 

@@ -9,7 +9,7 @@ mocks:
 
 # googletest test framework
 gt: gt.cpp mocks
-	 $(CXXCOMPILE) -o gt gt.cpp -I$(top_builddir)/googletest/googletest/include -I$(top_builddir)/googletest/googlemock/include $(top_builddir)/googletest/googlemock/lib/libgmock.a $(top_builddir)/googletest/googlemock/lib/libgtest.a $(top_builddir)/googletest/googlemock/lib/libgtest_main.a $(top_builddir)/src/*.o build/test/mocks/mock_HierarchyMaintainer.c build/test/mocks/mock_LayoutsFactory.c -Ibuild/test/mocks/ -I$(top_builddir)/cmock/src -I$(top_builddir)/cmock/vendor/unity/src -I$(top_builddir)/include/log4cpp $(top_builddir)/cmock/vendor/unity/src/unity.c $(top_builddir)/cmock/src/cmock.c
+	 $(CXXCOMPILE) -o gt gt.cpp -I$(top_builddir)/googletest/googletest/include -I$(top_builddir)/googletest/googlemock/include $(top_builddir)/googletest/googlemock/lib/libgmock.a $(top_builddir)/googletest/googlemock/lib/libgtest.a $(top_builddir)/googletest/googlemock/lib/libgtest_main.a $(top_builddir)/src/*.o build/test/mocks/mock_HierarchyMaintainer.c build/test/mocks/mock_LayoutsFactory.c -Ibuild/test/mocks/ -I$(top_builddir)/cmock/src -I$(top_builddir)/cmock/vendor/unity/src -I$(top_builddir)/include/log4cpp $(top_builddir)/cmock/vendor/unity/src/unity.c $(top_builddir)/cmock/src/cmock.c -DUNIT_TEST
 
 
 # Unity test framework

@@ -17,7 +17,7 @@
 
 namespace log4cpp
 {
-   class LOG4CPP_EXPORT LayoutsFactory
+   class /*LOG4CPP_EXPORT*/ LayoutsFactory
    {
       public:
          typedef FactoryParams params_t;
@@ -27,8 +27,9 @@ namespace log4cpp
          void registerCreator(const std::string& class_name, create_function_t create_function);
          std::auto_ptr<Layout> create(const std::string& class_name, const params_t& params);
          bool registed(const std::string& class_name) const;
-
+#if !defined(TEST) && !defined(UNIT_TEST)
       private:
+#endif
          LayoutsFactory(){};
 
          typedef std::map<std::string, create_function_t> creators_t;

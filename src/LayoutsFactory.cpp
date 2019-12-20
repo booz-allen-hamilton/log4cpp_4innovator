@@ -16,7 +16,10 @@ namespace log4cpp
    std::auto_ptr<Layout> create_pattern_layout(const FactoryParams& params);
    std::auto_ptr<Layout> create_pattern_layout(const FactoryParams& params);
    std::auto_ptr<Layout> create_pass_through_layout(const FactoryParams& params);
-
+// TODO: Works for unity test framework, but not googletest
+//#if defined(TEST) || defined(UNIT_TEST)
+   __attribute__((weak))
+//#endif
    LayoutsFactory& LayoutsFactory::getInstance()
    {
       if (!layouts_factory_)
