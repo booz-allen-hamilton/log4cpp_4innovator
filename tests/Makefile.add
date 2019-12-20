@@ -1,0 +1,54 @@
+
+# Common
+# Use CMock to generate mock code
+export CMOCK_DIR ?= ~/cmock
+mocks:
+	ruby ../cmock/scripts/create_mock.rb ../include/log4cpp/HierarchyMaintainer.hh
+	ruby ../cmock/scripts/create_mock.rb ../include/log4cpp/LayoutsFactory.hh
+
+
+# googletest test framework
+gt: gt.cpp mocks
+	 $(CXXCOMPILE) -o gt gt.cpp -I$(top_builddir)/googletest/googletest/include -I$(top_builddir)/googletest/googlemock/include $(top_builddir)/googletest/googlemock/lib/libgmock.a $(top_builddir)/googletest/googlemock/lib/libgtest.a $(top_builddir)/googletest/googlemock/lib/libgtest_main.a $(top_builddir)/src/*.o build/test/mocks/mock_HierarchyMaintainer.c build/test/mocks/mock_LayoutsFactory.c -Ibuild/test/mocks/ -I$(top_builddir)/cmock/src -I$(top_builddir)/cmock/vendor/unity/src -I$(top_builddir)/include/log4cpp $(top_builddir)/cmock/vendor/unity/src/unity.c $(top_builddir)/cmock/src/cmock.c
+
+
+# Unity test framework
+
+# Hacks to get everything to link
+export LDFLAGS = -pthread
+export INCLUDE_PATH ?= -I$(top_builddir)/include/log4cpp -I$(top_builddir)/include -I$(top_builddir)/googletest/googletest/include -I$(top_builddir)/googletest/googletest -I$(top_builddir)/googletest/googlemock/include -I$(top_builddir)/googletest/googlemock
+
+#TBD gtest complains if -DTEST
+#export TEST_CFLAGS =
+
+# TBD
+#UNITY_DIR ?= /home/combined/cmock/vendor/unity
+
+# Copied from cmock/examples/make_example
+export CC = g++
+export BUILD_DIR ?= ./build
+export SRC_DIR ?= ../src
+export TEST_DIR ?= ./test
+export TEST_BUILD_DIR ?= ${BUILD_DIR}/test
+TEST_MAKEFILE = ${TEST_BUILD_DIR}/MakefileTestSupport
+OBJ ?= ${BUILD_DIR}/obj
+OBJ_DIR = ${OBJ}
+default: all
+
+all: mocks setup test run
+
+setup:
+	mkdir -p ${BUILD_DIR}
+	mkdir -p ${OBJ}
+	ruby ../cmock/scripts/create_makefile.rb --silent
+
+clean:
+	rm -rf ${BUILD_DIR}
+
+run:
+	./build/main || true
+
+test: setup
+
+-include ${TEST_MAKEFILE}
+
