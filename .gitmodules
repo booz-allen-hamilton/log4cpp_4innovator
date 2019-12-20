@@ -1,6 +1,7 @@
 [submodule "cmock"]
 	path = cmock
 	url = https://github.com/booz-allen-hamilton/CMock
+        branch = master
 [submodule "googletest"]
 	path = googletest
 	url = https://github.com/google/googletest.git
