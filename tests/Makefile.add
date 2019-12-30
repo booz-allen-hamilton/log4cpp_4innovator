@@ -3,8 +3,7 @@
 # Use CMock to generate mock code
 export CMOCK_DIR ?= ../cmock
 mocks:
-	ruby ../cmock/scripts/create_mock.rb ../include/log4cpp/HierarchyMaintainer.hh
-	ruby ../cmock/scripts/create_mock.rb ../include/log4cpp/LayoutsFactory.hh
+	ruby ../cmock/lib/cmock.rb -ocmock.yml ../include/log4cpp/HierarchyMaintainer.hh ../include/log4cpp/LayoutsFactory.hh
 
 
 # googletest test framework
@@ -40,7 +39,7 @@ all: mocks setup test run
 setup:
 	mkdir -p ${BUILD_DIR}
 	mkdir -p ${OBJ}
-	ruby ../cmock/scripts/create_makefile.rb --silent
+	ruby ../cmock/scripts/create_makefile.rb --silent cmock.yml
 
 clean:
 	rm -rf ${BUILD_DIR}

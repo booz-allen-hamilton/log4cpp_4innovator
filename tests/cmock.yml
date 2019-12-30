@@ -1,0 +1,12 @@
+:cmock:
+  :plugins:
+#   - :ignore
+#   - :ignore_arg
+#   - :expect_any_args
+#   - :array
+#    - :cexception
+#    - :callback
+#    - :return_thru_ptr
+  :mock_prefix: mock_
+  :mock_path: ./build/test/mocks
+
