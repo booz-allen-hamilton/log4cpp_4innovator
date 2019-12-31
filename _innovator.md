@@ -74,6 +74,6 @@ gMock integrates nicer with Unity so that combination (i.e., Unity + CMock + gMo
 
 While these tests demonstrate achievement of the goals, and the Unity/CMock internal tests currently pass, there remains more work to do, including:
 
-1.  Updating other CMock plugins (e.g., array, callback, etc.) to use fully scoped names for mocked C++ static members
-2. Miscellaneous refactoring/cleanup
-3. Pull requests into CMock and Unity master
+1. Miscellaneous refactoring/cleanup
+2. Pull requests into CMock and Unity master
+3. Improve C++ parser and support for nested classes, multiple classes in a single header, etc.
